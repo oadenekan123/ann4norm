@@ -18,7 +18,7 @@ from ann4brains.utils.metrics import regression_metrics
 
 # calculating loss for generator
 # def gan_loss(n.out, n.label):
-#     gan_loss = 
+#     gan_loss = ()
 #     idt_loss = np.mean(n.out-n.label)
 #     cycle_loss = np.mean(n.out-n.label)
 #     return loss
