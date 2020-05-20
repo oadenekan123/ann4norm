@@ -14,14 +14,44 @@ from ann4brains.utils import h5_utils
 from ann4brains.utils.h5_utils import caffe_write_h5
 from ann4brains.utils.metrics import regression_metrics
 
-# def get_target(discrim_predic, label):
+# reconstruct connectomes from the generator output list
+# get discriminator's prediction for the connectomes
+# get mean squared error of discriminator's predictions - actual label
+
+
+# node_list: output of the generator for one example
+# returns: reconstructed connectome from generator output
+def reconstruct_connectome(node_list, num_regions):
+    connectome = np.reshape(node_list, (num_regions,num_regions))
+    return connectome
+
+# n.out: output layer of generator
+# returns: all reconstructed connectomes by calling reconstruct connectome
+def reconstruct_all_connectomes(n.out, num_regions):
+    connectomes = []
+    for node_list in n.out:
+        connectome = reconstruct_connectome(node_list, num_regions)
+        connectomes.append(connectome)
+    return np.array(connectomes)
+
+
+def get_discriminator_predictions(discriminator, reconstructed):
+    preds = discriminator.predict(reconstructed)
+    # i do not know if i am suppossed to do this... maybe look at the paper
+    preds[ preds >= 0.5] = 1
+    preds[ preds < 0.5] = 0
+    return preds
+    
 
 # calculating loss for generator
-# def gan_loss(n.out, n.label):
-#     gan_loss = ()
-#     idt_loss = np.mean(n.out-n.label)
-#     cycle_loss = np.mean(n.out-n.label)
-#     return loss
+def gan_loss(n.out, n.label, discriminator, site_labels):
+    reconstructed_output = reconstruct_all_connectomes(n.out)
+    discrim_preds = get_discriminator_predictions(discriminator, reconstructed_output)
+    gan_loss = np.mean(np.sum(np.abs(discrim_preds - site_labels)))
+    idt_loss = np.mean(n.out-n.label)
+    cycle_loss = np.mean(n.out-n.label)
+    loss = 0.5*gan_loss + 0.25*idt_loss + 0.25*cycle_loss
+    return loss
 
 
 def load_model(filepath):
