@@ -185,7 +185,7 @@ class BaseNet(object):
             if self.pars['loss'] == 'EuclideanLoss':
                 n.loss = L.EuclideanLoss(n.out, n.label)
             elif self.pars['loss'] == 'GANLoss':
-		        n.loss = gan_loss(n.out, n.label, discriminator)
+                n.loss = gan_loss(n.out, n.label, discriminator)
             else:
                 ValueError("Only 'EuclideanLoss' currently implemented for pars['loss']!")
         return n
