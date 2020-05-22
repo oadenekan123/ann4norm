@@ -184,11 +184,10 @@ class BaseNet(object):
         if mode != 'deploy':
             if self.pars['loss'] == 'EuclideanLoss':
                 n.loss = L.EuclideanLoss(n.out, n.label)
-	    elif self.pars['loss'] == 'GANLoss':
-		n.loss = gan_loss(n.out, n.label, discriminator)
+            elif self.pars['loss'] == 'GANLoss':
+		        n.loss = gan_loss(n.out, n.label, discriminator)
             else:
                 ValueError("Only 'EuclideanLoss' currently implemented for pars['loss']!")
-
         return n
 
     def create_prototxts(self, hdf5_train, hdf5_validation):  # TODO: Make protected
