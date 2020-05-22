@@ -48,7 +48,7 @@ def list_to_connectome(person_data, num_regions):
             # print("row:", row)
     return np.array(matrix)
 
-#%% connectomes to data
+#%% connectomes to discriminator data
 
 def connectomes_to_data(site_B_data, site_H_data, num_regions):
     # initialize array in which to hold site data; i is for channel dimension
@@ -65,15 +65,38 @@ def connectomes_to_data(site_B_data, site_H_data, num_regions):
     # create y data
     # site b is first col, site h is second
     both_site_length = len(site_B_data) + len(site_H_data)
-    y = np.zeros((both_site_length, 2))
+    y = np.zeros((both_site_length, 1))
     y[0:len(site_B_data), 0] = 1 # site b is first column
-    y[len(site_B_data)+1:len(y), 1] = 1 # site h is second column
+    y[len(site_B_data)+1:len(y), 0] = 0 # site h is second column
 
     # concatenate x data
     x = np.concatenate((site_B_connectomes, site_H_connectomes), axis=0)
     print(x.shape)
     print(y.shape)
     return (x,y)
+
+#%% connectomes to generator data
+
+def connectomes_to_generator_data(site_B_data, site_H_data, num_regions):
+    # initialize array in which to hold site data; i is for channel dimension
+    site_B_connectomes = np.ones((len(site_B_data), 1, num_regions, num_regions))
+    site_H_connectomes = np.ones((len(site_H_data), 1, num_regions, num_regions))
+
+    # create data matrices: each person call function
+    for person in range(len(site_B_data)):
+        site_B_connectomes[person, :, :, :] = list_to_connectome(site_B_data[person], num_regions)
+    for person in range(len(site_H_data)):
+        site_H_connectomes[person, :, :, :] = list_to_connectome(site_B_data[person], num_regions)
+        
+    # add option for which site to normalize to
+
+    # concatenate x data
+    x = site_B_connectomes
+    y = site_H_connectomes
+    print(x.shape)
+    print(y.shape)
+    return (x,y)
+
 
 #%% create e2n net
 def e2n(net_name, h, w, n_injuries, max_iter = 10000, test_interval = 50, snapshot = 1000):
@@ -105,7 +128,7 @@ def e2n(net_name, h, w, n_injuries, max_iter = 10000, test_interval = 50, snapsh
     return E2Nnet_sml
 
 #%% create e2e + e2n net
-def e2e(net_name, h, w, n_injuries, max_iter = 100, test_interval = 20, snapshot = 100):
+def e2e(net_name, h, w, n_injuries, max_iter = 10000, test_interval = 100, snapshot = 1000):
     # Specify the architecture.
     e2e_arch = [
         ['e2e', # e2e layer 

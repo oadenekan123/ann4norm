@@ -33,7 +33,7 @@ site_B_data = help.read_data(siteB_file)
 site_H_data = help.read_data(siteH_file)
 
 # create training data
-x,y = help.connectomes_to_data(site_B_data, site_H_data, num_regions)
+x,y = help.connectomes_to_generator_data(site_B_data, site_H_data, num_regions)
 
 #%% split data 
 # create train, val, and test thresholds
@@ -45,7 +45,7 @@ x_train, y_train, x_val, y_val, x_test, y_test = help.split_data(x, y, train_thr
 
 #%% set parameters and build model
 # Number of outputs.
-n_injuries = 1
+n_injuries = (x_train.shape[2], x_train.shape[3])
 h = x.shape[2]
 w = x.shape[3]
 os.environ["HDF5_USE_FILE_LOCKING"] = 'FALSE'

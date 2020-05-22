@@ -130,7 +130,7 @@ print(y_test.shape)
 
 ##set parameters
 # Number of outputs.
-n_injuries = 2 # NOTE: The synthetic code only works for 2 injuries right now.
+n_injuries = 1 # NOTE: The synthetic code only works for 2 injuries right now.
 
 # Spatial height and width of the data. 
 h = x_train.shape[2]

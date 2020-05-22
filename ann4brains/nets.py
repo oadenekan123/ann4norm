@@ -25,16 +25,20 @@ def reconstruct_connectome(node_list, num_regions):
     connectome = np.reshape(node_list, (num_regions,num_regions))
     return connectome
 
-# n.out: output layer of generator
+
+# gen_output: output layer of generator
 # returns: all reconstructed connectomes by calling reconstruct connectome
-def reconstruct_all_connectomes(n.out, num_regions):
+def reconstruct_all_connectomes(gen_output, num_regions):
     connectomes = []
-    for node_list in n.out:
+    for node_list in gen_output:
         connectome = reconstruct_connectome(node_list, num_regions)
         connectomes.append(connectome)
     return np.array(connectomes)
 
 
+# discriminator: discirminator model
+# reconstructed: output of generator model reconstructed into connectomes
+# returns: all reconstructed connectomes by calling reconstruct connectome
 def get_discriminator_predictions(discriminator, reconstructed):
     preds = discriminator.predict(reconstructed)
     # i do not know if i am suppossed to do this... maybe look at the paper
@@ -43,13 +47,17 @@ def get_discriminator_predictions(discriminator, reconstructed):
     return preds
     
 
-# calculating loss for generator
-def gan_loss(n.out, n.label, discriminator, site_labels):
-    reconstructed_output = reconstruct_all_connectomes(n.out)
-    discrim_preds = get_discriminator_predictions(discriminator, reconstructed_output)
-    gan_loss = np.mean(np.sum(np.abs(discrim_preds - site_labels)))
-    idt_loss = np.mean(n.out-n.label)
-    cycle_loss = np.mean(n.out-n.label)
+# gen_output: output of generator
+# labels: data labels
+# discriminator: discriminator model
+# site_labels: A (B) or B (H)  site labels
+# returns: all reconstructed connectomes by calling reconstruct connectome
+def gan_loss(gen_output, labels, discriminator):
+    reconstructed_output = reconstruct_all_connectomes(gen_output)
+    discrim_preds = get_discriminator_predictions(discriminator, reconstructed_output) 
+    gan_loss = np.mean(np.sum(np.abs(discrim_preds - 1)))
+    idt_loss = np.mean(gen_output-labels)
+    cycle_loss = np.mean(gen_output-labels)
     loss = 0.5*gan_loss + 0.25*idt_loss + 0.25*cycle_loss
     return loss
 
@@ -68,6 +76,9 @@ def load_model(filepath):
 
     return model
 
+
+# set discriminator as global variable
+discriminator = load_model('/scratch/oadenekan/project_norm/ann4brains/examples/models/E2Nnet_sml.pkl')
 
 # ABC for python 2 and 3. Now removed to make dependencies easier.
 # http://stackoverflow.com/a/35673504/754920
@@ -173,6 +184,8 @@ class BaseNet(object):
         if mode != 'deploy':
             if self.pars['loss'] == 'EuclideanLoss':
                 n.loss = L.EuclideanLoss(n.out, n.label)
+	    elif self.pars['loss'] == 'GANLoss':
+		n.loss = gan_loss(n.out, n.label, discriminator)
             else:
                 ValueError("Only 'EuclideanLoss' currently implemented for pars['loss']!")
 
