@@ -93,6 +93,7 @@ def connectomes_to_generator_data(site_B_data, site_H_data, num_regions):
     # concatenate x data
     x = site_B_connectomes
     y = site_H_connectomes
+    y = np.reshape(y, (num_regions, num_regions))
     print(x.shape)
     print(y.shape)
     return (x,y)
