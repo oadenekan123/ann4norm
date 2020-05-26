@@ -81,7 +81,12 @@ def load_model(filepath):
 # ABC for python 2 and 3. Now removed to make dependencies easier.
 # http://stackoverflow.com/a/35673504/754920
 # @six.add_metaclass(abc.ABCMeta)
-class BaseNet(object):
+
+
+# set discriminator as global variable
+discriminator = load_model('/scratch/oadenekan/project_norm/ann4brains/examples/models/E2Nnet_sml.pkl')
+
+class BaseNetGen(object):
 
     def __init__(self, net_name,
                  arch,  # Neural network architecture.
@@ -182,6 +187,8 @@ class BaseNet(object):
         if mode != 'deploy':
             if self.pars['loss'] == 'EuclideanLoss':
                 n.loss = L.EuclideanLoss(n.out, n.label)
+            elif self.pars['loss'] == 'GANLoss':
+                n.loss = gan_loss(n.out, n.label, discriminator)
             else:
                 ValueError("Only 'EuclideanLoss' currently implemented for pars['loss']!")
         return n
@@ -388,11 +395,8 @@ class BaseNet(object):
         return pars
 
 
-# set discriminator as global variable
-discriminator = load_model('/scratch/oadenekan/project_norm/ann4brains/examples/models/E2Nnet_sml.pkl')
 
-
-class BrainNetCNN(BaseNet):
+class BrainNetCNNGen(BaseNetGen):
 
     def predict(self, X):
         """Computes the predictions for X.
@@ -467,4 +471,3 @@ class BrainNetCNN(BaseNet):
             # parent = os.path.dirname(os.getcwd())
             # file_name = os.path.join(parent, file_name)
             plt.savefig(file_name)
-
