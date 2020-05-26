@@ -389,7 +389,7 @@ class BaseNet(object):
 
 
 # set discriminator as global variable
-discriminator = load_model('/scratch/oadenekan/project_norm/ann4brains/examples/models/E2Nnet_sml.pkl')
+#discriminator = load_model('/scratch/oadenekan/project_norm/ann4brains/examples/models/E2Nnet_sml.pkl')
 
 
 class BrainNetCNN(BaseNet):
