@@ -16,13 +16,15 @@ import random
 
 
 # To import ann4brains if not installed.
+print(os.getcwd())
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '..')))
 from ann4brains.synthetic.injury import ConnectomeInjury
 from ann4brains.nets import BrainNetCNN, load_model
+from ann4brains.nets_gen import BrainNetCNNGen
 
 
 # import helpers directory and update
-import helpers_cluster as help
+import helpers_cluster_gen as help
 import importlib
 
 
@@ -56,8 +58,8 @@ h = x.shape[2]
 w = x.shape[3]
 os.environ["HDF5_USE_FILE_LOCKING"] = 'FALSE'
 
-net_name = 'E2Nnet_sml'
-net = help.e2n(net_name, h, w, n_injuries)
+net_name = 'E2Nnet_sml_generator'
+net = help.e2n_generator(net_name, h, w, n_injuries)
 
 # accuracies = np.zeros((num_splits))
 # actual = []
@@ -76,7 +78,7 @@ print("mission completed!")
 preds = net.predict(x_val)
 
 # Compute the accuracy
-net.print_results(preds, y_val)
+#net.print_results(preds, y_val)
 # print("predictions raw", preds)
 # print("y_val", y_val)
 preds_trans = np.zeros((preds.shape))

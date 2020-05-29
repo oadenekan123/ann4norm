@@ -50,9 +50,9 @@ for person in range(len(site_H_data)):
 #%% create y data
 # site b is first col, site h is second
 both_site_length = len(site_B_data) + len(site_H_data)
-y = np.zeros((both_site_length, 2))
+y = np.zeros((both_site_length, 1))
 y[0:len(site_B_data), 0] = 1 # site b is first column
-y[len(site_B_data)+1:len(y), 1] = 1 # site h is second column
+y[len(site_B_data)+1:len(y), 0] = 0 # site h is second column
 
 # concatenate
 x = np.concatenate((site_B_connectomes, site_H_connectomes), axis=0)
@@ -167,7 +167,7 @@ E2Nnet_sml = BrainNetCNN(net_name, # Unique model name.
 #set pars
 E2Nnet_sml.pars['max_iter'] = 100 # Train the model for 1000 iterations. (note this should be run for much longer!)
 E2Nnet_sml.pars['test_interval'] = 50 # Check the valid data every 50 iterations.
-E2Nnet_sml.pars['snapshot'] = 10 # Save the model weights every 1000 iterations.
+E2Nnet_sml.pars['snapshot'] = 20 # Save the model weights every 1000 iterations.
 
 
 # In[32]:
@@ -193,6 +193,7 @@ E2Nnet_sml.plot_iter_metrics(True, file_name)
 # %%
 # Predict labels of test data
 preds = E2Nnet_sml.predict(x_val)
+preds = np.reshape(preds, (len(preds), 1))
 
 
 # %%
@@ -215,6 +216,6 @@ print("accuracy", accuracy)
 # file_name = "models/test_data.pkl"
 # with open(file_name, 'wb') as pkl_file:
 #         pickle.dump(test_data, pkl_file, protocol = 2)
-# E2Nnet_sml.save('models/E2Nnet_sml.pkl')
+E2Nnet_sml.save('models/E2Nnet_sml.pkl')
 
 

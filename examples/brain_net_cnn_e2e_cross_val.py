@@ -17,7 +17,9 @@ from datetime import datetime
 
 
 # To import ann4brains if not installed.
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '..')))
+# sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
+sys.path.append('/scratch/oadenekan/project_norm/ann4brains')
+import ann4brains
 from ann4brains.synthetic.injury import ConnectomeInjury
 from ann4brains.nets import BrainNetCNN, load_model
 
@@ -111,6 +113,7 @@ for counter, val_idxs in enumerate(splits):
 
     # predict
     preds = net.predict(x_val)
+    preds = np.reshape(preds, (len(preds), 1))
 
     # Compute the accuracy
     net.print_results(preds, y_val)

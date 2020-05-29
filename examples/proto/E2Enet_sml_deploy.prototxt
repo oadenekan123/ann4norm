@@ -12,9 +12,109 @@ layer {
   }
 }
 layer {
-  name: "e2n"
+  name: "Convolution1"
   type: "Convolution"
   bottom: "data"
+  top: "Convolution1"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 32
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+    kernel_h: 10
+    kernel_w: 1
+  }
+}
+layer {
+  name: "Concat1"
+  type: "Concat"
+  bottom: "Convolution1"
+  bottom: "Convolution1"
+  bottom: "Convolution1"
+  bottom: "Convolution1"
+  bottom: "Convolution1"
+  bottom: "Convolution1"
+  bottom: "Convolution1"
+  bottom: "Convolution1"
+  bottom: "Convolution1"
+  bottom: "Convolution1"
+  top: "Concat1"
+  concat_param {
+    axis: 2
+  }
+}
+layer {
+  name: "Convolution2"
+  type: "Convolution"
+  bottom: "data"
+  top: "Convolution2"
+  param {
+    lr_mult: 1.0
+    decay_mult: 1.0
+  }
+  param {
+    lr_mult: 2.0
+    decay_mult: 0.0
+  }
+  convolution_param {
+    num_output: 32
+    stride: 1
+    weight_filler {
+      type: "xavier"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0.0
+    }
+    kernel_h: 1
+    kernel_w: 10
+  }
+}
+layer {
+  name: "Concat2"
+  type: "Concat"
+  bottom: "Convolution2"
+  bottom: "Convolution2"
+  bottom: "Convolution2"
+  bottom: "Convolution2"
+  bottom: "Convolution2"
+  bottom: "Convolution2"
+  bottom: "Convolution2"
+  bottom: "Convolution2"
+  bottom: "Convolution2"
+  bottom: "Convolution2"
+  top: "Concat2"
+  concat_param {
+    axis: 3
+  }
+}
+layer {
+  name: "e2e"
+  type: "Eltwise"
+  bottom: "Concat1"
+  bottom: "Concat2"
+  top: "e2e"
+  eltwise_param {
+    operation: SUM
+  }
+}
+layer {
+  name: "e2n"
+  type: "Convolution"
+  bottom: "e2e"
   top: "e2n"
   param {
     lr_mult: 1.0
@@ -25,7 +125,7 @@ layer {
     decay_mult: 0.0
   }
   convolution_param {
-    num_output: 130
+    num_output: 64
     stride: 1
     weight_filler {
       type: "xavier"

@@ -13,6 +13,8 @@ from ann4brains.utils import h5_utils
 # import six
 from ann4brains.utils.h5_utils import caffe_write_h5
 from ann4brains.utils.metrics import regression_metrics
+# added for generator
+from ann4brains.nets import load_model
 
 # reconstruct connectomes from the generator output list
 # get discriminator's prediction for the connectomes
@@ -30,6 +32,10 @@ def reconstruct_connectome(node_list, num_regions):
 # returns: all reconstructed connectomes by calling reconstruct connectome
 def reconstruct_all_connectomes(gen_output, num_regions):
     connectomes = []
+    gen_output = L.FlattenLayer(gen_output)
+    #gen_output = caffe.io.blobproto_to_array(gen_output)
+    gen_output = np.asarray(gen_output)
+    #gen_output = np.array(gen_output.data).reshape(*gen_output.shape.dim)
     for node_list in gen_output:
         connectome = reconstruct_connectome(node_list, num_regions)
         connectomes.append(connectome)
@@ -52,8 +58,8 @@ def get_discriminator_predictions(discriminator, reconstructed):
 # discriminator: discriminator model
 # site_labels: A (B) or B (H)  site labels
 # returns: all reconstructed connectomes by calling reconstruct connectome
-def gan_loss(gen_output, labels, discriminator):
-    reconstructed_output = reconstruct_all_connectomes(gen_output)
+def gan_loss(gen_output, labels, discriminator, num_regions):
+    reconstructed_output = reconstruct_all_connectomes(gen_output, num_regions)
     discrim_preds = get_discriminator_predictions(discriminator, reconstructed_output) 
     gan_loss = np.mean(np.sum(np.abs(discrim_preds - 1)))
     idt_loss = np.mean(gen_output-labels)
@@ -61,20 +67,6 @@ def gan_loss(gen_output, labels, discriminator):
     loss = 0.5*gan_loss + 0.25*idt_loss + 0.25*cycle_loss
     return loss
 
-
-def load_model(filepath):
-    """Load the model.
-
-    :param filepath: Filename and path to load the model:
-    :return: a BrainnetCNN/BaseNet object
-    """
-
-    with open(filepath, 'rb') as fid:
-        model = cPickle.load(fid)
-
-    model.load_parameters()
-
-    return model
 
 
 
@@ -188,7 +180,7 @@ class BaseNetGen(object):
             if self.pars['loss'] == 'EuclideanLoss':
                 n.loss = L.EuclideanLoss(n.out, n.label)
             elif self.pars['loss'] == 'GANLoss':
-                n.loss = gan_loss(n.out, n.label, discriminator)
+                n.loss = gan_loss(n.out, n.label, discriminator, 10) # number of reigons
             else:
                 ValueError("Only 'EuclideanLoss' currently implemented for pars['loss']!")
         return n
@@ -376,7 +368,7 @@ class BaseNetGen(object):
         pars['learning_momentum'] = 0.9  # Momentum used in learning.
         pars['weight_decay'] = 0.0005  # Weight decay penalty.
 
-        pars['loss'] = 'EuclideanLoss'  # The loss to use (currently only EuclideanLoss works)
+        pars['loss'] = 'GANLoss' #'EuclideanLoss'  # The loss to use (currently only EuclideanLoss works)
         pars['compute_metrics_func'] = regression_metrics  # Can override with your own as long as follows format.
 
         # Network parameters

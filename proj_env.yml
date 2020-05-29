@@ -1,0 +1,11 @@
+name: norm
+dependencies:
+  - python=2.7   # or 2.7
+  - numpy=1.13.1
+  - matplotlib
+  - h5py
+  - scipy
+  - cloudpickle
+  - caffe
+  - scikit-learn=0.20
+  - pytest

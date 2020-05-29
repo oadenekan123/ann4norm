@@ -93,7 +93,8 @@ def connectomes_to_generator_data(site_B_data, site_H_data, num_regions):
     # concatenate x data
     x = site_B_connectomes
     y = site_H_connectomes
-    y = np.reshape(y, (num_regions, num_regions))
+    num_nodes = num_regions * num_regions
+    y = np.reshape(y, (len(site_H_connectomes), num_nodes))
     print(x.shape)
     print(y.shape)
     return (x,y)
@@ -159,12 +160,41 @@ def e2e(net_name, h, w, n_injuries, max_iter = 10000, test_interval = 100, snaps
 
     # NOTE using the above parameters takes awhile for the model to train (~2 hours ish? on a GPU)
     # If you want to do some simple fast experiments to start, use these settings instead.
-    E2Enet_sml.pars['max_iter'] = 100 # Train the model for 100 iterations (note this should be run for much longer!)
-    E2Enet_sml.pars['test_interval'] = 20 # Check the valid data every 20 iterations.
-    E2Enet_sml.pars['snapshot'] = 100 # Save the model weights every 100 iterations.
+    E2Enet_sml.pars['max_iter'] = max_iter # Train the model for 100 iterations (note this should be run for much longer!)
+    E2Enet_sml.pars['test_interval'] = test_interval # Check the valid data every 20 iterations.
+    E2Enet_sml.pars['snapshot'] = snapshot # Save the model weights every 100 iterations.
 
     return E2Enet_sml
 
+
+#%% create e2n net
+def e2n_generator(net_name, h, w, n_injuries, max_iter = 10000, test_interval = 50, snapshot = 1000):
+    # Specify the architecture using a list of dictionaries.
+    e2n_arch = [
+        ['e2n', # e2n layer 
+        {'n_filters': 130, # 130 feature maps 
+        'kernel_h': h, 'kernel_w': w  # Cross filter of size h x 1 by 1 x w (non-sliding, only on diagonal)
+        }
+        ], 
+        ['dropout', {'dropout_ratio': 0.5}], # Dropout with 0.5 dropout rate.
+        ['relu',    {'negative_slope': 0.33}], # Very leaky ReLU.
+        ['fc',      {'n_filters': 30}],  # Fully connected/dense (Node-to-Graph when after e2n) layer
+        ['relu',    {'negative_slope': 0.33}], # Very leaky ReLU
+        ['out',     {'n_filters': n_injuries}] # Output with 2 nodes that correspond to 2 injuries.
+    ]
+
+    # Create BrainNetCNN model
+    E2Nnet_sml = BrainNetCNN(net_name, # Unique model name.
+                            e2n_arch, # List of dictionaries specifying the architecture.
+                            hardware='cpu', # Or 'cpu'.
+                            dir_data='./generated_synthetic_data', # Where to write the data to.
+                            )
+    #set pars
+    E2Nnet_sml.pars['max_iter'] = max_iter # Train the model for 1000 iterations. (note this should be run for much longer!)
+    E2Nnet_sml.pars['test_interval'] = test_interval # Check the valid data every 50 iterations.
+    E2Nnet_sml.pars['snapshot'] = snapshot # Save the model weights every 1000 iterations.
+
+    return E2Nnet_sml
 
 #%% randomly assign data to train, val, and test
 

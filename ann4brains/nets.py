@@ -423,12 +423,12 @@ class BrainNetCNN(BaseNet):
                                                                          test_metrics_0['corr_0'],
                                                                          test_metrics_0['p_0']))
 
-        test_metrics_1 = regression_metrics(preds[:, 1], y_test[:, 1])
-        print('%s => mae: %.3f, SDAE: %0.3f, corr: %.3f, p-val: %.3f' % ('class 1',
-                                                                         test_metrics_1['mad'],
-                                                                         test_metrics_1['std_mad'],
-                                                                         test_metrics_1['corr_0'],
-                                                                         test_metrics_1['p_0']))
+        #test_metrics_1 = regression_metrics(preds[:, 1], y_test[:, 1])
+        #print('%s => mae: %.3f, SDAE: %0.3f, corr: %.3f, p-val: %.3f' % ('class 1',
+         #                                                                test_metrics_1['mad'],
+          #                                                               test_metrics_1['std_mad'],
+           #                                                              test_metrics_1['corr_0'],
+            #                                                             test_metrics_1['p_0']))
 
     def plot_iter_metrics(self, save = False, file_name = ""):
         """Plot the train, test metrics over iterations.
@@ -450,14 +450,14 @@ class BrainNetCNN(BaseNet):
             #    mets[0].append(met[1][m_key])
             mad.append(met[1]['mad'])
             corr_0.append(met[1]['corr_0'])
-            corr_1.append(met[1]['corr_1'])
+        #    corr_1.append(met[1]['corr_1'])
 
         fig, ax = plt.subplots()
         axes = [ax, ax.twinx()]
         axes[0].plot(self.train_metrics, color='purple', label='train loss')
         axes[0].plot(itr, mad, color='red', label='valid mad')
         axes[1].plot(itr, corr_0, color='blue', label='valid corr_0')
-        axes[1].plot(itr, corr_1, color='green', label='valid corr_1')
+        #axes[1].plot(itr, corr_1, color='green', label='valid corr_1')
 
         lines, labels = axes[0].get_legend_handles_labels()
         lines2, labels2 = axes[1].get_legend_handles_labels()
